@@ -1,0 +1,37 @@
+{
+  "name": "fish-djs",
+  "version": "0.1.1",
+  "description": "A discord.js flexabal expantion client.",
+  "main": "./src/index.js/",
+  "type": "./typings/index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js/",
+    "dev": "nodemon ./src/index.js/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Wilbert-mad/fish-client.git"
+  },
+  "keywords": [
+    "javascript",
+    "djs-client",
+    "bot",
+    "discord"
+  ],
+  "author": "Xa_puppet<Wilbert-mad>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Wilbert-mad/fish-client/issues"
+  },
+  "homepage": "https://github.com/Wilbert-mad/fish-client#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.4.0"
+  }
+}
