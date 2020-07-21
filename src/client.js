@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-const { Client, User } = require("discord.js");
-const { readdir } = require("fs").promises;
+const { Client, User, Collection } = require('discord.js');
+const { join } = require('path');
+const fs = require('fs');
 
 /**
  * Discord.js Client framework
@@ -8,7 +9,7 @@ const { readdir } = require("fs").promises;
 module.exports = class FishClient extends Client {
   /**
    * Options for a FishClient
-   * @typedef {ClientOptions} FishClientOptions
+   * @typedef {import('discord.js').ClientOptions} FishClientOptions
    * @property {string} [clientPrefix=;] - Default command prefix.
    * @property {string} [dev] - ID of the bot owner/developer Discord user.
    * @property {string} [invite] - Invite URL to the bot's support server.
@@ -18,8 +19,8 @@ module.exports = class FishClient extends Client {
    * @param {FishClientOptions} [options] - Options for the client.
    */
   constructor(options = {}) {
-    if (typeof options.commandsPrefix === "undefined") options.commandsPrefix = ";";
-    if (options.commandsPrefix === null) options.commandsPrefix = "";
+    if (typeof options.commandsPrefix === 'undefined') options.commandsPrefix = ';';
+    if (options.commandsPrefix === null) options.commandsPrefix = '';
     super(options);
 
     /**
@@ -27,14 +28,24 @@ module.exports = class FishClient extends Client {
      */
     this._commandsPrefix = null;
 
+    /**
+     * @private
+     */
+    this.commands = new Collection();
+
+    /**
+     * @private
+     */
+    this.aliases = new Collection();
+
     // gets the developer.
     if (options.dev) {
-      this.on("ready", () => {
-        if (typeof options.dev !== "string") throw new TypeError("Owner options is not string Unable to fetch.");
+      this.on('ready', () => {
+        if (typeof options.dev !== 'string')
+          throw new TypeError('Owner options is not string Unable to fetch.');
         this.users.fetch(options.dev).catch((err) => {
-          if (err) console.log(err);
-          this.emit("warn", `Unable to fetch developer ${options.dev}.`);
-          this.emit("error", err);
+          this.emit('warn', `Unable to fetch developer ${options.dev}.`);
+          this.emit('error', err);
         });
       });
     }
@@ -42,17 +53,25 @@ module.exports = class FishClient extends Client {
 
   /**
    * @type {string}
-   * @emits {@link FishClient#commandPrefixChange}
+   * @emits {@link FishClient#PrefixChange}
    */
   get commandsPrefix() {
-    if (typeof this._commandsPrefix === "undefined" || this._commandsPrefix === null)
+    if (typeof this._commandsPrefix === 'undefined' || this._commandsPrefix === null)
       return this.options.commandsPrefix;
     return this._commandsPrefix;
   }
 
   set commandsPrefix(prefix) {
     this._commandsPrefix = prefix;
-    this.emit("commandPrefixChange", null, this._commandsPrefix);
+    this.emit('PrefixChange', null, this._commandsPrefix);
+  }
+
+  /**
+   * This path is used to load all your custome commands;
+   * @param {string} [path] The path to the commands folder.
+   */
+  claim(path) {
+    if (typeof path !== 'string') throw new TypeError('Unexpected file Path type is not string');
   }
 
   /**
@@ -61,35 +80,46 @@ module.exports = class FishClient extends Client {
    */
   get dev() {
     if (!this.options.dev) return null;
-    if (typeof this.options.dev === "string") return this.users.cache.get(this.options.dev);
+    if (typeof this.options.dev === 'string') return this.users.cache.get(this.options.dev);
     return null;
   }
+
   /**
-   *
    * @param {User} [user] - The user thats is being checked.
    * @returns {boolean}
    */
   isDev(user) {
     if (!this.options.dev) return false;
     user = this.users.resolve(user);
-    if (!user) throw new RangeError("Unable to resolve user spesefied.");
-    if (typeof this.options.dev === "string") return user.id === this.options.dev;
+    if (!user) throw new RangeError('Unable to resolve user spesefied.');
+    if (typeof this.options.dev === 'string') return user.id === this.options.dev;
     throw new RangeError("The client's 'dev' option is an unknown.");
   }
+
   /**
-   * @returns {Promise<VoidFunction>}
+   * Registers the default commands
    */
-  get register() {
-    async function run() {
-      // eslint-disable-next-line no-undef
-      (await readdir(`${__dirname}/base/events`))
-        .filter((e) => e.includes("message.js"))
-        .forEach((f) => this.on("message", require(`../src/base/events/${f}`).bind(null, this)));
-    }
-    return run;
+  registerDefaults() {
+  /* eslint-disable no-undef */
+    let command = [];
+    fs.readdir(join(__dirname, './base/commands'), (err, files) => {
+      if (err) throw err;
+      let jsfiles = files.filter((f) => f.split('.').pop() === 'js');
+      if (jsfiles.length <= 0) return console.log('[logs] no commands to load!');
+      jsfiles.forEach((f, i) => {
+        let pull = require(join(__dirname, `../src/base/commands/${f}`));
+        /* eslint-enable no-undef */
+        if (pull === undefined) return;
+        this.commands.set(pull.name, pull);
+        if (pull.aliases === undefined) return;
+        pull.aliases.forEach((alias) => this.aliases.set(alias, pull.name));
+        command.push(f.split('.')[0]);
+        if (i + 1 === jsfiles.length) this.emit('RegisterDefaults', command, this);
+      });
+    });
   }
 
-  async destroy() {
-    await super.destroy();
+  destroy() {
+    super.destroy();
   }
 };

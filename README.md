@@ -71,3 +71,7 @@ Node 8+ or newer is required.
   - [ ] help command
   - [ ] eval command
   - [ ] reload command
+
+### bugs
+
+Message events undefined 'undefined' more info on the file path: 'src/bace/events/message.js'

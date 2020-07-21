@@ -1,3 +1,4 @@
 package-lock.json
 node_modules
-commands
+src/base/events/guild.js
+src/base/commands/help.js
