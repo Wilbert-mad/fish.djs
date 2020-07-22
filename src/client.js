@@ -8,7 +8,7 @@ const fs = require('fs');
  */
 module.exports = class FishClient extends Client {
   /**
-   * Options for a FishClient
+   * Options for a Client
    * @typedef {import('discord.js').ClientOptions} FishClientOptions
    * @property {string} [clientPrefix=;] - Default command prefix.
    * @property {string} [dev] - ID of the bot owner/developer Discord user.
@@ -93,7 +93,7 @@ module.exports = class FishClient extends Client {
     user = this.users.resolve(user);
     if (!user) throw new RangeError('Unable to resolve user spesefied.');
     if (typeof this.options.dev === 'string') return user.id === this.options.dev;
-    throw new RangeError("The client's 'dev' option is an unknown.");
+    throw new RangeError('The client\'s "dev" option is an unknown.');
   }
 
   /**

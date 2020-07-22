@@ -50,6 +50,31 @@ class exampleOfConstructer extends somthing.command {
 
 ```
 
+Cerent commands templat
+```js
+
+module.exports = {
+  name: '',
+  aliases: [''],
+  description: '',
+  usage: '',
+  configs: {
+    DevOnly: Boolean,
+    guildOnly: Boolean,
+    messageType: '',
+    permissions: [''],
+    args: {
+      select: '',
+      required: Boolean
+    },
+  },
+  run: (client, message, args) => {
+
+  }
+};
+
+```
+
 ## Installation
 
 Node 8+ or newer is required.
@@ -74,4 +99,4 @@ Node 8+ or newer is required.
 
 ### bugs
 
-Message events undefined 'undefined' more info on the file path: 'src/bace/events/message.js'
+- [X] Message events 'undefined' more info on the file path: 'src/bace/events/message.js'
